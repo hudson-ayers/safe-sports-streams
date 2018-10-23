@@ -14,7 +14,7 @@ setup(
     py_modules=[splitext(basename(path))[0] for path in glob("src/*.py")],
     install_requires=["lxml", "beautifulsoup4", "requests", "praw"],
     keywords=["scraping", "streams"],
-    scripts=["bin/scrape_aggregators"],
+    scripts=["bin/scrape_aggregators", "bin/scrape_reddit"],
     url="https://github.com/hudson-ayers/safe-sports-streams",
     classifiers=[  # https://pypi.python.org/pypi?:action=list_classifiers
         "Development Status :: 3 - Alpha",
