@@ -1,5 +1,9 @@
 language: python
 sudo: required
+addons:
+  apt:
+    packages:
+      - chromium-chromedriver
 dist: xenial
 python:
   - '3.6'
@@ -18,9 +22,10 @@ install:
 
 before_script:
   - make check
+  - ln -s /usr/lib/chromium-browser/chromedriver ~/bin/chromedriver
 
 script:
-  - coverage run --source=streamscrape -m pytest tests
+  - travis_wait coverage run --source=streamscrape -m pytest tests
 
 after_success:
   - coveralls

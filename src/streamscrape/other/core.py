@@ -13,7 +13,16 @@ Specifically, we look at:
     - https://www.batmanstream.net/
 """
 
+import logging
+
+from streamscrape.other import livetv
+
+logger = logging.getLogger(__name__)
+
 
 def scrape():
     """Core driver method for scraping other aggregator sites."""
-    return
+    total_urls = []
+    logger.info("Scraping http://livetv.sx")
+    total_urls.extend(livetv.scrape())
+    return total_urls
