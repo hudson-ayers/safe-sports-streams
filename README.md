@@ -1,5 +1,6 @@
 # safe-sports-streams
 
+[![Build Status](https://travis-ci.com/hudson-ayers/safe-sports-streams.svg?branch=master)](https://travis-ci.com/hudson-ayers/safe-sports-streams)
 
 ## For Developers
 
