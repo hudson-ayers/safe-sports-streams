@@ -1,0 +1,24 @@
+language: python
+python:
+  - '3.6'
+  - '3.7'
+
+matrix:
+  fast_finish: true
+
+notifications:
+  email: false
+
+install:
+  - sudo apt-get -qq update
+  - make dev
+  - pip install coveralls
+
+before_script:
+  - make check
+
+script:
+  - coverage run --source=streamscrape -m pytest tests
+
+after_success:
+  - coveralls
