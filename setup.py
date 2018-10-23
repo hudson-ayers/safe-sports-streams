@@ -12,7 +12,7 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     py_modules=[splitext(basename(path))[0] for path in glob("src/*.py")],
-    install_requires=["lxml", "beautifulsoup4", "requests", "praw"],
+    install_requires=["beautifulsoup4", "praw", "requests", "selenium"],
     keywords=["scraping", "streams"],
     scripts=["bin/scrape_aggregators", "bin/scrape_reddit"],
     url="https://github.com/hudson-ayers/safe-sports-streams",

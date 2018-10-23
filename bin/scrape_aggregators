@@ -2,6 +2,7 @@
 """Simple commandline interface for scraping aggregator sites for live stream URLs."""
 import argparse
 import logging
+from streamscrape import other
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -33,7 +34,7 @@ if __name__ == "__main__":
         log_level = logging.ERROR
 
     # Configure logging for this application
-    log = logging.getLogger("[scraper]")
+    log = logging.getLogger("streamscrape")
     log.propagate = 0  # prevent propagation to the root logger
     ch = logging.StreamHandler()
     log.setLevel(log_level)
@@ -43,3 +44,6 @@ if __name__ == "__main__":
     log.addHandler(ch)
 
     # Call the main routine
+    result = other.scrape()
+    for r in result:
+        print("[{}] {} ({})".format(r["timestamp"], r["url"], r["ip"]))
