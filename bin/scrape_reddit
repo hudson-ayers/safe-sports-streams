@@ -11,6 +11,23 @@ if __name__ == "__main__":
         """
     )
     parser.add_argument(
+        "-s",
+        "--subreddit_name",
+        default="",
+        dest="subreddit_name",
+        help="Name of the subreddit to scrape.\
+              Leave blank to scrape all known streaming subreddits",
+    )
+    parser.add_argument(
+        "-n",
+        "--num_posts",
+        type=int,
+        dest="num_posts",
+        default=500,  # Default max allowed by reddit
+        help="How many of the hot posts on the subreddit to scrape",
+    )
+    # TODO: Add args for sorting by new/hot/top
+    parser.add_argument(
         "-v",
         "--verbose",
         dest="verbose",
@@ -34,7 +51,7 @@ if __name__ == "__main__":
         log_level = logging.ERROR
 
     # Configure logging for this application
-    log = logging.getLogger("[scraper]")
+    log = logging.getLogger("streamscrape")
     log.propagate = 0  # prevent propagation to the root logger
     ch = logging.StreamHandler()
     log.setLevel(log_level)
@@ -44,4 +61,8 @@ if __name__ == "__main__":
     log.addHandler(ch)
 
     # Call the main routine
-    reddit.scrape()
+    if args.subreddit_name:
+        single_sub_urls = reddit.scrape_subreddit(args.subreddit_name, args.num_posts)
+    else:
+        all_urls = reddit.scrape_all(args.num_posts)
+        # TODO: Store in database
