@@ -44,7 +44,7 @@ STREAMING_SUBREDDITS = [
 def find_urls(string):
     # findall() has been used
     # with valid conditions for urls in string
-    urls = re.findall("(?=\(http).+(?=\))", string)
+    urls = re.findall(r"(?=\(http).+(?=\))", string)
     # TODO: Make below code efficient instead of terrible (just change urls in place)
     urls_cleaned = []
     for url in urls:
