@@ -69,7 +69,7 @@ def scrape():
     all_urls = []
 
     # Process all urls in parallel.
-    with mp.Pool(2 * mp.cpu_count()) as p:
+    with mp.Pool(mp.cpu_count()) as p:
         results = p.map(_scrape_event, live_urls)
         for event_urls in results:
             all_urls.extend(url for url in event_urls)
