@@ -1,6 +1,7 @@
 # safe-sports-streams
 
 [![Build Status](https://travis-ci.com/hudson-ayers/safe-sports-streams.svg?branch=master)](https://travis-ci.com/hudson-ayers/safe-sports-streams)
+[![Coverage Status](https://coveralls.io/repos/github/hudson-ayers/safe-sports-streams/badge.svg?branch=master)](https://coveralls.io/github/hudson-ayers/safe-sports-streams?branch=master)
 
 ## For Developers
 
