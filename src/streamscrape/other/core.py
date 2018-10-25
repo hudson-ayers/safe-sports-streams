@@ -15,7 +15,7 @@ Specifically, we look at:
 
 import logging
 
-from streamscrape.other import livetv
+from streamscrape.other import livetv, rojadirecta
 
 logger = logging.getLogger(__name__)
 
@@ -25,4 +25,6 @@ def scrape():
     total_urls = []
     logger.info("Scraping http://livetv.sx")
     total_urls.extend(livetv.scrape())
+    logger.info("Scraping http://www.rojadirecta.me")
+    total_urls.extend(rojadirecta.scrape())
     return total_urls
