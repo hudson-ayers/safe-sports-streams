@@ -15,7 +15,14 @@ Specifically, we look at:
 
 import logging
 
-from streamscrape.other import cricsports, firstrow, livetv, rojadirecta, stream2watch
+from streamscrape.other import (
+    cricsports,
+    firstrow,
+    fromhot,
+    livetv,
+    rojadirecta,
+    stream2watch,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -33,4 +40,6 @@ def scrape():
     total_urls.extend(cricsports.scrape())
     logger.info("Scraping http://firstrowonly.eu")
     total_urls.extend(firstrow.scrape())
+    logger.info("Scraping http://www.fromhot.com")
+    total_urls.extend(fromhot.scrape())
     return total_urls
