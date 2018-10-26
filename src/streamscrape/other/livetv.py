@@ -1,7 +1,6 @@
 """Code for scraping from LiveTV."""
 import logging
 import multiprocessing as mp
-from pprint import pformat
 
 import requests
 from bs4 import BeautifulSoup
@@ -73,7 +72,5 @@ def scrape():
         results = p.map(_scrape_event, live_urls)
         for event_urls in results:
             all_urls.extend(url for url in event_urls)
-
-    logger.debug("{}".format(pformat(all_urls)))
 
     return all_urls

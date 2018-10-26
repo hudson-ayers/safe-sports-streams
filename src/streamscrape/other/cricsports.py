@@ -2,7 +2,6 @@
 import logging
 import multiprocessing as mp
 import re
-from pprint import pformat
 
 import requests
 from bs4 import BeautifulSoup
@@ -36,7 +35,7 @@ def _scrape_event(url):
             continue
         event_data = (get_utc_time_str(), url, get_ip_address(url))
         urls.add(event_data)
-
+        logger.debug("URL: {}".format(event_data))
     return tuple({"timestamp": e[0], "url": e[1], "ip": e[2]} for e in urls)
 
 
@@ -60,7 +59,5 @@ def scrape():
         results = p.map(_scrape_event, event_urls)
         for event_urls in results:
             all_urls.extend(url for url in event_urls)
-
-    logger.debug("{}".format(pformat(all_urls)))
 
     return all_urls
