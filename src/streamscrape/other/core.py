@@ -15,7 +15,7 @@ Specifically, we look at:
 
 import logging
 
-from streamscrape.other import cricsports, livetv, rojadirecta, stream2watch
+from streamscrape.other import cricsports, firstrow, livetv, rojadirecta, stream2watch
 
 logger = logging.getLogger(__name__)
 
@@ -31,4 +31,6 @@ def scrape():
     total_urls.extend(stream2watch.scrape())
     logger.info("Scraping http://cricsports.sc")
     total_urls.extend(cricsports.scrape())
+    logger.info("Scraping http://firstrowonly.eu")
+    total_urls.extend(firstrow.scrape())
     return total_urls

@@ -1,8 +1,11 @@
+import logging
 import socket
 from datetime import datetime
 from urllib.parse import urlparse
 
 from selenium import webdriver
+
+logger = logging.getLogger(__name__)
 
 
 def get_utc_time_str():
@@ -22,7 +25,13 @@ def get_ip_address(url):
     :rtype: str
     """
     parsed_uri = urlparse(url)
-    return socket.gethostbyname(parsed_uri.netloc)
+    try:
+        ip = socket.gethostbyname(parsed_uri.netloc)
+        return ip
+    except Exception as e:
+        logger.error("URL: {}".format(url))
+        logger.error(e)
+        return "N/A"
 
 
 def get_chrome_webdriver():
