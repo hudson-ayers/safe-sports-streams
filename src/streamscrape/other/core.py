@@ -20,6 +20,7 @@ from streamscrape.other import (
     firstrow,
     fromhot,
     livetv,
+    mamahd,
     rojadirecta,
     stream2watch,
     viprow,
@@ -45,4 +46,6 @@ def scrape():
     total_urls.extend(fromhot.scrape())
     logger.info("Scraping https://www.viprow.net")
     total_urls.extend(viprow.scrape())
+    logger.info("Scraping https://www.mamahd.org")
+    total_urls.extend(mamahd.scrape())
     return total_urls

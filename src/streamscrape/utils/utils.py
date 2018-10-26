@@ -23,15 +23,15 @@ def get_ip_address(url):
     :param url: The string URL to parse.
     :return: The IPv4 address of the hostname.
     :rtype: str
+    :raises: socket.gaierror if the name/protocol is unknown
     """
     parsed_uri = urlparse(url)
     try:
         ip = socket.gethostbyname(parsed_uri.netloc)
         return ip
     except Exception as e:
-        logger.error("URL: {}".format(url))
-        logger.error(e)
-        return "N/A"
+        logger.error("URL: {} error with {}".format(url, e))
+        raise
 
 
 def get_chrome_webdriver():
