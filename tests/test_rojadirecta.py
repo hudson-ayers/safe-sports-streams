@@ -1,5 +1,4 @@
 import logging
-from pprint import pformat
 
 from streamscrape.other import rojadirecta
 
@@ -9,5 +8,4 @@ def test_scrape(caplog):
     caplog.set_level(logging.INFO)
     logger = logging.getLogger(__name__)
     results = rojadirecta.scrape()
-    logger.info("{}".format(pformat(results)))
     logger.info("Total URLs: {}".format(len(results)))
