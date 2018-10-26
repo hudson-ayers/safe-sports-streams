@@ -20,7 +20,9 @@ def _scrape_event(url):
     This returns BOTH the MAMAHD page, and the embedded page.
     """
     urls = set()
-    page = requests.get(url)
+
+    # Ignore SSL errors
+    page = requests.get(url, verify=False)
     soup = BeautifulSoup(page.text, "html.parser")
 
     # Grab all the watch button links
