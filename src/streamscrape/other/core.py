@@ -22,6 +22,7 @@ from streamscrape.other import (
     livetv,
     rojadirecta,
     stream2watch,
+    viprow,
 )
 
 logger = logging.getLogger(__name__)
@@ -42,4 +43,6 @@ def scrape():
     total_urls.extend(firstrow.scrape())
     logger.info("Scraping http://www.fromhot.com")
     total_urls.extend(fromhot.scrape())
+    logger.info("Scraping https://www.viprow.net")
+    total_urls.extend(viprow.scrape())
     return total_urls

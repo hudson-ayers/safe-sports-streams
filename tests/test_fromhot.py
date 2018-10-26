@@ -10,3 +10,4 @@ def test_scrape(caplog):
     logger = logging.getLogger(__name__)
     results = fromhot.scrape()
     logger.info("{}".format(pformat(results)))
+    logger.info("Total URLs: {}".format(len(results)))
