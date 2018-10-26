@@ -52,8 +52,6 @@ def scrape():
         for url_div in soup.find_all("div", class_="title-and-icon")
     )
 
-    all_urls = []
-
     # Process all urls in parallel.
     with mp.Pool(mp.cpu_count()) as p:
         results = p.map(_scrape_event, event_urls)
