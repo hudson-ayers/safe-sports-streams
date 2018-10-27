@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 import argparse
-import datetime as dt
 import logging
 import os
 import re
+import time
 
 import praw
 
@@ -21,7 +21,6 @@ STREAMING_SUBREDDITS = [
     "cfbstreams",
     "ncaabballstreams",
     "puttstreams",
-    "puckstreams",
     "nhlstreams",
     "mlbstreams",
     "cricketstreams",
@@ -30,7 +29,6 @@ STREAMING_SUBREDDITS = [
     "boxingstreams",
     "wwestreams",
     "motorsportsstreams",
-    "tennisstreams",
 ]
 
 # Design: We store all URLS in a list of dictionaries where each dictionary contains
@@ -45,7 +43,6 @@ def find_urls(string):
     # findall() has been used
     # with valid conditions for urls in string
     urls = re.findall(r"(?=\(http).+(?=\))", string)
-    # TODO: Make below code efficient instead of terrible (just change urls in place)
     urls_cleaned = []
     for url in urls:
         # remove leading paren
@@ -55,6 +52,24 @@ def find_urls(string):
             url = url[: url.index(")")]
         urls_cleaned.append(url)
     return urls_cleaned
+
+
+def check_if_game_thread(submission):
+    # For example, nbastreams always prefaces with "game thread",
+    # but soccerstreams merely lists the teams and game time in brackets.
+    if (
+        "game thread" in submission.title.lower()
+        or " vs " in submission.title.lower()
+        or " v " in submission.title.lower()
+    ):
+        return True
+    elif (
+        submission.subreddit.display_name == "motorsportsstreams"
+        and "[" in submission.title.lower()
+    ):
+        return True
+    else:
+        return False
 
 
 def scrape_subreddit(subreddit_name, num_posts):
@@ -73,16 +88,14 @@ def scrape_subreddit(subreddit_name, num_posts):
 
     subreddit = reddit.subreddit(subreddit_name)
     hot_subreddit = subreddit.hot(limit=num_posts)
-    cur_time = dt.datetime.now()
+    cur_time = float(time.time())
     # Parse data from individual posts
     for submission in hot_subreddit:
+        # By default, skip all posts more than 2 days (172800 seconds) old
+        if cur_time - submission.created_utc > 172800:
+            continue
         # First, check that the submission is a game thread.
-        # For example, nbastreams always prefaces with "game thread",
-        # but soccerstreams merely lists the teams and game time in brackets.
-        if (
-            "game thread" in submission.title.lower()
-            or " vs " in submission.title.lower()
-        ):
+        if check_if_game_thread(submission):
             submission.comments.replace_more(limit=0)  # remove "more comments" links
             for top_level_comment in submission.comments:
                 # skip removed comments
@@ -96,7 +109,6 @@ def scrape_subreddit(subreddit_name, num_posts):
                 if urls:
                     # Collect data on the post to associate with these URLs
                     # TODO: Check flair, overlay count
-                    # print(top_level_comment.author.flair_text)
                     if not top_level_comment.author:
                         log.warn("This comment has no author:" + top_level_comment.body)
                         name = ""
@@ -145,8 +157,8 @@ def scrape_subreddit(subreddit_name, num_posts):
                             mobile_compat = 2
                         else:
                             # Probably just a statement like "mobile compatible"
-                            log.warning(
-                                "Misunderstoof mobile compat for "
+                            log.debug(
+                                "Misunderstood mobile compat for "
                                 + top_level_comment.body
                             )
                             mobile_compat = 3
