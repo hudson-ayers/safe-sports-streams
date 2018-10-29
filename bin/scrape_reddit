@@ -3,6 +3,7 @@
 import argparse
 import logging
 from streamscrape import reddit
+from streamscrape import utils
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -64,5 +65,17 @@ if __name__ == "__main__":
     if args.subreddit_name:
         single_sub_urls = reddit.scrape_subreddit(args.subreddit_name, args.num_posts)
     else:
-        all_urls = reddit.scrape_all(args.num_posts)
+        # all_urls = reddit.scrape_all(args.num_posts)
+        url_dict = {
+            "url": "www.example.com",
+            "created": 1540809431,
+            "accessed": 1540809431,
+            "subreddit": "hudstreams",
+            "poster": "hudson",
+            "score": 5,
+            "mobile": 0,
+        }
+        all_urls = []
+        all_urls.append(url_dict)
         # TODO: Store in database
+        utils.save_urls_to_db(all_urls)
