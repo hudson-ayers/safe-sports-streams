@@ -49,3 +49,16 @@ Project (get this file from Hudson).
 Once this proxy service is running, you can use psycopg2 to connect to your
 Cloud database from within Python.
 
+DEBUGGING
+
+To debug problems with writing to the database, it can be helpful to have
+direct access to a psql client connected to that database. For our setup, the
+easiest way to get this is by logging into our GCP project, selecting our
+database instance, clicking "connect using Cloud Shell", and running
+
+$ gcloud sql connect cs356-streams --user=postgres --quiet
+
+(you will be prompted to enter our password)
+
+This will provide you with a psql interface via which you can test various db
+commands.
