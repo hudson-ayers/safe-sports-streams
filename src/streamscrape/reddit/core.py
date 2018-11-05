@@ -72,7 +72,7 @@ def check_if_game_thread(submission):
         return False
 
 
-def scrape_subreddit(subreddit_name, num_posts):
+def scrape_subreddit(subreddit_name, num_posts, last_scrape_time=0):
     if subreddit_name not in STREAMING_SUBREDDITS:
         log.warn(subreddit_name + " is not a known streaming subreddit.")
         return []
@@ -92,7 +92,11 @@ def scrape_subreddit(subreddit_name, num_posts):
     # Parse data from individual posts
     for submission in hot_subreddit:
         # By default, skip all posts more than 2 days (172800 seconds) old
-        if cur_time - submission.created_utc > 172800:
+        # If last scrape time is known, ignore all posts that preceded it
+        if last_scrape_time == 0:
+            log.info("No last scrape time provided.")
+            last_scrape_time = cur_time - 172800
+        if submission.created_utc < last_scrape_time:
             continue
         # First, check that the submission is a game thread.
         if check_if_game_thread(submission):
@@ -185,22 +189,25 @@ def scrape_subreddit(subreddit_name, num_posts):
     return url_list
 
 
-def scrape_all(num_posts):
+def scrape_all(num_posts, last_scrape_time=0):
     all_urls = []
     no_streams_list = []
     found_streams_count = []
     for subreddit_name in STREAMING_SUBREDDITS:
-        urls = scrape_subreddit(subreddit_name, num_posts)
+        urls = scrape_subreddit(subreddit_name, num_posts, last_scrape_time)
         if not urls:
             no_streams_list.append(subreddit_name)
         else:
             found_streams_count.append((subreddit_name, len(urls)))
-    log.info("The following subreddits have no streams active: " + str(no_streams_list))
+            all_urls.extend(urls)
+    log.info(
+        "The following subreddits have no new streams active: " + str(no_streams_list)
+    )
     print(
-        "The number of streams found for each other subreddit: "
+        "The number of new streams found for each other subreddit: "
         + str(found_streams_count)
     )
-    return (all_urls, no_streams_list)
+    return all_urls
 
 
 def main():

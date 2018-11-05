@@ -1,0 +1,64 @@
+This short document describes the database setup being used to store URLs
+of streaming websites and other information associate with these websites.
+
+We have created a Google CloudSQL instance "cs356-streams". This instance is
+currently the minimal possible instance which can be created for this purpose,
+and is a PostgreSQL instance. On this instance there currently exists a single
+DB, "stream_urls", which currently contains a single table, "stream_urls".
+
+The "stream_urls" table was created via the following command (which describes
+all of the rows in the table and their types):
+"CREATE TABLE account(
+ url VARCHAR (1000) PRIMARY KEY,
+ base_url VARCHAR (200),
+ aggregator VARCHAR (200),
+ subreddit VARCHAR (50),
+ reddit_user VARCHAR (50),
+ mobile_compat INT,
+ upvotes INT,
+ created_on TIMESTAMP NOT NULL,
+ last_access TIMESTAMP NOT NULL,
+ access_count INT DEFAULT 1
+);"
+
+The only fields above which really deserve explanation are access_count (if a
+url has been visited before, you should increment this field for the existing
+entry rather than reinserting) and base_url (the base domain of the site on
+which the stream is hosted).
+
+In order to insert into this table from within Python code, you must first run
+the google cloud_sql_proxy on that machine, as Google currently only provides
+an API to directly connect to Google CloudSQL instances for Java and Go.
+Running this proxy requires downloading it:
+
+$ wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy
+
+making it executable:
+
+$ chmod +x cloud_sql_proxy
+
+And running it. The
+command that should be run (assuming a Unix system) is as follows:
+
+$ ./cloud_sql_proxy -instances=sports-streaming-security:us-west1:cs356-streams=tcp:6543 -credential_file=sports-streaming-security-64e6f13735d5.json
+
+Where the second argument is a json file containing the authentication
+credentials for the SQL-only service account associated with this Google Cloud
+Project (get this file from Hudson).
+
+Once this proxy service is running, you can use psycopg2 to connect to your
+Cloud database from within Python.
+
+DEBUGGING
+
+To debug problems with writing to the database, it can be helpful to have
+direct access to a psql client connected to that database. For our setup, the
+easiest way to get this is by logging into our GCP project, selecting our
+database instance, clicking "connect using Cloud Shell", and running
+
+$ gcloud sql connect cs356-streams --user=postgres --quiet
+
+(you will be prompted to enter our password)
+
+This will provide you with a psql interface via which you can test various db
+commands.
