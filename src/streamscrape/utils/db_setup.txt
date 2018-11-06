@@ -11,6 +11,7 @@ all of the rows in the table and their types):
 "CREATE TABLE account(
  url VARCHAR (1000) PRIMARY KEY,
  base_url VARCHAR (200),
+ ip VARCHAR (20),
  aggregator VARCHAR (200),
  subreddit VARCHAR (50),
  reddit_user VARCHAR (50),

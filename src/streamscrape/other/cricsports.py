@@ -2,11 +2,12 @@
 import logging
 import multiprocessing as mp
 import re
+import time
 
 import requests
 from bs4 import BeautifulSoup
 
-from streamscrape.utils import get_ip_address, get_utc_time_str
+from streamscrape.utils import get_ip_address
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ def _scrape_event(url):
             url = watch_btn.parent.attrs["href"]
         except KeyError:
             continue
-        event_data = (get_utc_time_str(), url, get_ip_address(url))
+        event_data = (int(time.time()), url, get_ip_address(url))
         urls.add(event_data)
         logger.debug("URL: {}".format(event_data))
     return tuple({"timestamp": e[0], "url": e[1], "ip": e[2]} for e in urls)

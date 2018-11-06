@@ -1,3 +1,7 @@
+# Project specifics
+*.json
+cloud_sql_proxy
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -1,10 +1,11 @@
 """Code for scraping from stream2watch.org."""
 import logging
+import time
 
 import requests
 from bs4 import BeautifulSoup
 
-from streamscrape.utils import get_ip_address, get_utc_time_str
+from streamscrape.utils import get_ip_address
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ def scrape():
         except KeyError:
             continue
         event_data = {
-            "timestamp": get_utc_time_str(),
+            "timestamp": int(time.time()),
             "url": href,
             "ip": get_ip_address(href),
         }

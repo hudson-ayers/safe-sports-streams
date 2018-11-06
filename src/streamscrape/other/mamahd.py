@@ -2,11 +2,12 @@
 import logging
 import multiprocessing as mp
 import socket
+import time
 
 import requests
 from bs4 import BeautifulSoup
 
-from streamscrape.utils import get_ip_address, get_utc_time_str
+from streamscrape.utils import get_ip_address
 
 logger = logging.getLogger(__name__)
 
@@ -32,13 +33,13 @@ def _scrape_event(url):
                 if "stream-href" in a.attrs["class"]:
                     # Get BOTH the mamahd url and the embeded URL
                     url = a.attrs["href"]
-                    event_data = (get_utc_time_str(), url, get_ip_address(url))
+                    event_data = (int(time.time()), url, get_ip_address(url))
                     urls.add(event_data)
 
                     prefix = "http://mamacdn.com/link.php?asad="
                     if url.startswith(prefix):
                         url = url.replace(prefix, "")
-                        event_data = (get_utc_time_str(), url, get_ip_address(url))
+                        event_data = (int(time.time()), url, get_ip_address(url))
                         urls.add(event_data)
 
                     logger.debug("URL: {}".format(event_data))
