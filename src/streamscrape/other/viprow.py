@@ -1,11 +1,12 @@
 """Code for scraping from viprow."""
 import logging
 import re
+import time
 
 import requests
 from bs4 import BeautifulSoup
 
-from streamscrape.utils import get_ip_address, get_utc_time_str
+from streamscrape.utils import get_ip_address
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ def scrape():
             url = HOME + url
 
         event_data = {
-            "timestamp": get_utc_time_str(),
+            "timestamp": int(time.time()),
             "url": url,
             "ip": get_ip_address(url),
         }

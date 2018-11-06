@@ -2,13 +2,22 @@
 """Simple commandline interface for scraping aggregator sites for live stream URLs."""
 import argparse
 import logging
+import time
 from streamscrape import other
+from streamscrape import utils
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="""
         Script to scrape several major aggregators for live stream URLS.
         """
+    )
+    parser.add_argument(
+        "-p",
+        "--preview",
+        dest="preview",
+        action="store_true",
+        help="Print URLs to stdout rather than saving to DB.",
     )
     parser.add_argument(
         "-v",
@@ -43,7 +52,26 @@ if __name__ == "__main__":
     ch.setFormatter(formatter)
     log.addHandler(ch)
 
+    logger = logging.getLogger(__name__)
+    if args.preview:
+        logger.warning("Running in preview mode. Records will not save to DB.")
+
     # Call the main routine
     result = other.scrape()
-    for r in result:
-        print("[{}] {} ({})".format(r["timestamp"], r["url"], r["ip"]))
+    for aggregator in result:
+        for agg, urls in aggregator.items():
+            if args.preview:
+                for url in urls:
+                    print(
+                        "[{}][{}] {} ({})".format(
+                            time.strftime(
+                                "%Y-%m-%d %H:%M:%S", time.gmtime(url["timestamp"])
+                            ),
+                            agg,
+                            url["url"],
+                            url["ip"],
+                        )
+                    )
+            else:
+                utils.save_urls_to_db(urls, agg)
+                utils.update_last_scanned(agg, int(time.time()))

@@ -2,7 +2,6 @@ import calendar
 import logging
 import os
 import socket
-from datetime import datetime
 from urllib.parse import urlparse
 
 import psycopg2
@@ -12,15 +11,6 @@ from selenium import webdriver
 logger = logging.getLogger(__name__)
 
 GCSQL_PWD = os.environ["GCSQL_PWD"]
-
-
-def get_utc_time_str():
-    """Return the current UTC time as a string.
-
-    :return: The current UTC time.
-    :rtype: str
-    """
-    return str(datetime.utcnow())
 
 
 def get_ip_address(url):
@@ -132,7 +122,7 @@ def update_last_scanned(agg, scan_time):
     return 0
 
 
-def get_base_url(url):
+def _get_base_url(url):
     o = urlparse(url)
     return o.netloc
 
@@ -149,7 +139,8 @@ def save_urls_to_db(urls, agg):
     GCP instance, which you must get from Hudson.
     More information can be found in db_setup.txt, in this directory.
 
-    :param url_info: A list of dictionaries containing the urls and associated info
+    :param urls: A list of dictionaries containing the urls and associated info
+    :param agg: The name of the aggregator scanned
     :rtype: int
     """
     conn = psycopg2.connect(
@@ -162,55 +153,101 @@ def save_urls_to_db(urls, agg):
     cur = conn.cursor()
     add_url_cmd = (
         "INSERT INTO stream_urls "
-        "(url, base_url, aggregator, subreddit, reddit_user,"
+        "(url, base_url, ip, aggregator, subreddit, reddit_user,"
         "mobile_compat, upvotes, created_on, last_access)"
-        " VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        " VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
     )
     update_cmd = (
         "UPDATE stream_urls SET "
         "(last_access, access_count)"
         "= (%s, %s) WHERE url = (%s)"
     )
-    for url in urls:
-        # TODO: Improve error handling for connection failures
-        try:
-            cur.execute(
-                add_url_cmd,
-                (
-                    url.get("url"),
-                    get_base_url(url.get("url")),
-                    agg,
-                    url.get("subreddit"),
-                    url.get("poster"),
-                    url.get("mobile_compat"),
-                    url.get("score"),
-                    psycopg2.TimestampFromTicks(url.get("created")),
-                    psycopg2.TimestampFromTicks(url.get("accessed")),
-                ),
-            )
-        except IntegrityError:
-            # URL was already in db! Instead of insert, update access count
-            conn.rollback()
-            get_access_cnt_cmd = (
-                "SELECT access_count FROM stream_urls WHERE url = '"
-                + url.get("url")
-                + "'"
-            )
-            cur.execute(get_access_cnt_cmd)
-            rows = cur.fetchall()
-            prev_count = rows[0]
-            logger.info("Detected a duplicate URL: " + url.get("url"))
-            new_count = prev_count[0] + 1
-            cur.execute(
-                update_cmd,
-                (
-                    psycopg2.TimestampFromTicks(url.get("accessed")),
-                    new_count,
-                    url.get("url"),
-                ),
-            )
 
-        conn.commit()
+    if agg == "reddit":
+        for url in urls:
+            # TODO: Improve error handling for connection failures
+            try:
+                cur.execute(
+                    add_url_cmd,
+                    (
+                        url.get("url"),
+                        _get_base_url(url.get("url")),
+                        get_ip_address(url.get("url")),
+                        agg,
+                        url.get("subreddit"),
+                        url.get("poster"),
+                        url.get("mobile_compat"),
+                        url.get("score"),
+                        psycopg2.TimestampFromTicks(url.get("created")),
+                        psycopg2.TimestampFromTicks(url.get("accessed")),
+                    ),
+                )
+            except IntegrityError:
+                # URL was already in db! Instead of insert, update access count
+                conn.rollback()
+                get_access_cnt_cmd = (
+                    "SELECT access_count FROM stream_urls WHERE url = '"
+                    + url.get("url")
+                    + "'"
+                )
+                cur.execute(get_access_cnt_cmd)
+                rows = cur.fetchall()
+                prev_count = rows[0]
+                logger.info("Detected a duplicate URL: " + url.get("url"))
+                new_count = prev_count[0] + 1
+                cur.execute(
+                    update_cmd,
+                    (
+                        psycopg2.TimestampFromTicks(url.get("accessed")),
+                        new_count,
+                        url.get("url"),
+                    ),
+                )
+
+            conn.commit()
+    else:
+        for url in urls:
+            # `created_on` is meaningless in this context. Instead, it
+            # represents the first access time.
+            try:
+                cur.execute(
+                    add_url_cmd,
+                    (
+                        url.get("url"),
+                        _get_base_url(url.get("url")),
+                        get_ip_address(url.get("url")),
+                        agg,
+                        None,
+                        None,
+                        None,
+                        None,
+                        psycopg2.TimestampFromTicks(url.get("timestamp")),
+                        psycopg2.TimestampFromTicks(url.get("timestamp")),
+                    ),
+                )
+            except IntegrityError:
+                # URL was already in db! Instead of insert, update access count
+                conn.rollback()
+                get_access_cnt_cmd = (
+                    "SELECT access_count FROM stream_urls WHERE url = '"
+                    + url.get("url")
+                    + "'"
+                )
+                cur.execute(get_access_cnt_cmd)
+                rows = cur.fetchall()
+                prev_count = rows[0]
+                logger.info("Detected a duplicate URL: " + url.get("url"))
+                new_count = prev_count[0] + 1
+                cur.execute(
+                    update_cmd,
+                    (
+                        psycopg2.TimestampFromTicks(url.get("timestamp")),
+                        new_count,
+                        url.get("url"),
+                    ),
+                )
+
+            conn.commit()
 
     cur.close()
     conn.close()

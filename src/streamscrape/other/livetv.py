@@ -1,11 +1,12 @@
 """Code for scraping from LiveTV."""
 import logging
 import multiprocessing as mp
+import time
 
 import requests
 from bs4 import BeautifulSoup
 
-from streamscrape.utils import get_chrome_webdriver, get_ip_address, get_utc_time_str
+from streamscrape.utils import get_chrome_webdriver, get_ip_address
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,7 @@ def _scrape_event(url):
         if link.startswith("//"):
             link = "http:" + link
 
-        event_data = (get_utc_time_str(), link, get_ip_address(link))
+        event_data = (int(time.time()), link, get_ip_address(link))
         logger.debug("LiveTV URL data: {}".format(event_data))
         event_urls.add(event_data)
 
