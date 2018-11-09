@@ -173,6 +173,7 @@ def save_urls_to_db(urls, agg):
         "(last_access, access_count)"
         "= (%s, %s) WHERE url = (%s)"
     )
+    get_access_cnt_cmd = "SELECT access_count FROM stream_urls WHERE url = (%s)"
 
     if agg == "reddit":
         for url in urls:
@@ -199,15 +200,10 @@ def save_urls_to_db(urls, agg):
             except IntegrityError:
                 # URL was already in db! Instead of insert, update access count
                 conn.rollback()
-                get_access_cnt_cmd = (
-                    "SELECT access_count FROM stream_urls WHERE url = '"
-                    + url.get("url")
-                    + "'"
-                )
-                cur.execute(get_access_cnt_cmd)
+                cur.execute(get_access_cnt_cmd, (url.get("url"),))
                 rows = cur.fetchall()
                 prev_count = rows[0]
-                logger.info("Detected a duplicate URL: " + url.get("url"))
+                logger.debug("Detected a duplicate URL: " + url.get("url"))
                 new_count = prev_count[0] + 1
                 cur.execute(
                     update_cmd,
@@ -245,15 +241,10 @@ def save_urls_to_db(urls, agg):
             except IntegrityError:
                 # URL was already in db! Instead of insert, update access count
                 conn.rollback()
-                get_access_cnt_cmd = (
-                    "SELECT access_count FROM stream_urls WHERE url = '"
-                    + url.get("url")
-                    + "'"
-                )
-                cur.execute(get_access_cnt_cmd)
+                cur.execute(get_access_cnt_cmd, (url.get("url"),))
                 rows = cur.fetchall()
                 prev_count = rows[0]
-                logger.info("Detected a duplicate URL: " + url.get("url"))
+                logger.debug("Detected a duplicate URL: " + url.get("url"))
                 new_count = prev_count[0] + 1
                 cur.execute(
                     update_cmd,
