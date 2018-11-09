@@ -4,6 +4,7 @@ import os
 import socket
 from urllib.parse import urlparse
 
+import geoip2.database
 import psycopg2
 from psycopg2 import IntegrityError
 from selenium import webdriver
@@ -11,6 +12,16 @@ from selenium import webdriver
 logger = logging.getLogger(__name__)
 
 GCSQL_PWD = os.environ["GCSQL_PWD"]
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+reader = geoip2.database.Reader(dir_path + "/GeoLite2-Country.mmdb")
+
+
+def get_geolocation(ip):
+    """Return the geolocation of the IP based on GeoLite2 database."""
+    response = reader.country(ip)
+
+    return response.country.iso_code
 
 
 def get_ip_address(url):
@@ -153,9 +164,9 @@ def save_urls_to_db(urls, agg):
     cur = conn.cursor()
     add_url_cmd = (
         "INSERT INTO stream_urls "
-        "(url, base_url, ip, aggregator, subreddit, reddit_user,"
+        "(url, base_url, ip, country, aggregator, subreddit, reddit_user,"
         "mobile_compat, upvotes, created_on, last_access)"
-        " VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        " VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
     )
     update_cmd = (
         "UPDATE stream_urls SET "
@@ -167,12 +178,15 @@ def save_urls_to_db(urls, agg):
         for url in urls:
             # TODO: Improve error handling for connection failures
             try:
+                ip = get_ip_address(url.get("url"))
+                country = get_geolocation(ip)
                 cur.execute(
                     add_url_cmd,
                     (
                         url.get("url"),
                         _get_base_url(url.get("url")),
-                        get_ip_address(url.get("url")),
+                        ip,
+                        country,
                         agg,
                         url.get("subreddit"),
                         url.get("poster"),
@@ -210,12 +224,15 @@ def save_urls_to_db(urls, agg):
             # `created_on` is meaningless in this context. Instead, it
             # represents the first access time.
             try:
+                ip = get_ip_address(url.get("url"))
+                country = get_geolocation(ip)
                 cur.execute(
                     add_url_cmd,
                     (
                         url.get("url"),
                         _get_base_url(url.get("url")),
-                        get_ip_address(url.get("url")),
+                        ip,
+                        country,
                         agg,
                         None,
                         None,

@@ -12,6 +12,7 @@ all of the rows in the table and their types):
  url VARCHAR (1000) PRIMARY KEY,
  base_url VARCHAR (200),
  ip VARCHAR (20),
+ country VARCHAR (30),
  aggregator VARCHAR (200),
  subreddit VARCHAR (50),
  reddit_user VARCHAR (50),
